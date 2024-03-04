@@ -50,6 +50,13 @@ const buttons = [
     },
   },
   {
+    label: 'BgVideo',
+    className: 'add-bgVideo',
+    onClick: ({ setShowBgVideoBox }) => {
+      setShowBgVideoBox(true);
+    },
+  },
+  {
     label: '刪除元件',
     className: 'delete-element',
     onClick: ({ setShowDeleteBox }) => {
@@ -63,6 +70,7 @@ export default function ElementButtons({
   objData,
   setObjData,
   setShowVideoBox,
+  setShowBgVideoBox,
 }) {
   const addFontElement = () => {
     const lastFontId = objData
@@ -127,6 +135,27 @@ export default function ElementButtons({
   //   setObjData(updatedElementData);
   // };
 
+  // const addBgVideoElement = () => {
+  //   const lastBgVideoId = objData
+  //     .filter((element) => element.type === 'BGVIDEO')
+  //     .reduce((maxId, element) => {
+  //       const idNumber = parseInt(element.id.split('-')[1]);
+  //       return idNumber > maxId ? idNumber : maxId;
+  //     }, 0);
+
+  //   const nextBgVideoId = `bgVideo-${String(lastBgVideoId + 1).padStart(
+  //     3,
+  //     '0'
+  //   )}`;
+  //   const updatedElementData = [
+  //     ...objData,
+  //     { id: nextBgVideoId, type: 'BGVIDEO' },
+  //   ];
+
+  //   localStorage.setItem('theatre-data', JSON.stringify(updatedElementData));
+  //   setObjData(updatedElementData);
+  // };
+
   return (
     <Wrapper>
       {buttons.map((button, index) => (
@@ -139,6 +168,7 @@ export default function ElementButtons({
               addFontElement,
               addImageElement,
               addBgElement,
+              setShowBgVideoBox,
               setShowVideoBox,
             })
           }
