@@ -5,6 +5,7 @@ import SettingButtons from './button/setting-button';
 import JSONLightBox from './lightbox/show-json';
 import DeleteLightBox from './lightbox/delete-obj';
 import VideoLightBox from './lightbox/add-video';
+import BgVideoLightBox from './lightbox/add-bg-video';
 
 const LightBoxWrapper = styled.div`
   position: relative;
@@ -25,6 +26,7 @@ export default function EditPanel({ sheet, setObjData, objData }) {
   const [showJSONLightBox, setShowJSONLightBox] = useState(false);
   const [showDeleteBox, setShowDeleteBox] = useState(false);
   const [showVideoBox, setShowVideoBox] = useState(false);
+  const [showBgVideoBox, setShowBgVideoBox] = useState(false);
 
   //JSON data
   const [animateJSON, setAnimateJSON] = useState({}); // 存在 storage 的 objData
@@ -57,6 +59,15 @@ export default function EditPanel({ sheet, setObjData, objData }) {
             setShowVideoBox={setShowVideoBox}
           />
         )}
+
+        {/* 背景影片 src */}
+        {showBgVideoBox && (
+          <BgVideoLightBox
+            objData={objData}
+            setObjData={setObjData}
+            setShowVideoBox={setShowBgVideoBox}
+          />
+        )}
       </LightBoxWrapper>
 
       <ButtonWrapper>
@@ -70,6 +81,7 @@ export default function EditPanel({ sheet, setObjData, objData }) {
           setObjData={setObjData}
           objData={objData}
           setShowVideoBox={setShowVideoBox}
+          setShowBgVideoBox={setShowBgVideoBox}
         />
       </ButtonWrapper>
     </>

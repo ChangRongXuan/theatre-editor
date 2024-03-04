@@ -2,13 +2,11 @@ import FontElement from './elements/font';
 import ImageElement from './elements/image';
 import BackgroundElement from './elements/background';
 import VideoElement from './elements/video';
+import BgVideoElement from './elements/bgVideo';
 import styled from 'styled-components';
-
 const Wrapper = styled.div`
   width: 100%;
   height: 100%;
-  /* padding-top: 56.25%; 16:9 比例，即 9 / 16 * 100%/ */
-  /* padding-top: 75%; // 4:3 */
   position: relative;
   overflow: hidden;
   margin: auto;
@@ -92,12 +90,29 @@ export default function Stage({
       );
     });
 
+  const bgVideoElements = objData
+    .filter((data) => data.type === 'BGVIDEO')
+    .map((data) => {
+      return (
+        <BgVideoElement
+          key={'bgVideo' + data.id}
+          id={data.id}
+          source={data.src}
+          sheet={sheet}
+          stageSize={stageSize}
+          draggable={draggable}
+          onError={handleOnError}
+        />
+      );
+    });
+
   return (
     <Wrapper id='theatre-stage'>
       {fontElements}
       {imageElements}
       {bgElements}
       {videoElements}
+      {bgVideoElements}
     </Wrapper>
   );
 }
