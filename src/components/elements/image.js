@@ -10,7 +10,6 @@ const ImageWrapper = styled.div`
   overflow: hidden;
   height: auto;
   box-sizing: border-box;
-  outline: 1px solid red;
 
   img {
     width: 100%;

@@ -11,16 +11,12 @@ const BgWrapper = styled.div`
   width: 100%;
   height: 100%;
   box-sizing: border-box;
-  outline: 3px solid blue;
 
   img {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    /* object-fit: contain; */
     display: block;
-    outline: 3px solid red;
-    /* object-position: top center; */
   }
 `;
 
