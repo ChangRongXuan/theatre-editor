@@ -36,7 +36,7 @@ export default function DemoScroll() {
 
   // --------------------------
 
-  const objJson = localStorage.getItem('theatre-data'); // get objectJSON in local-storage
+  const objJson = localStorage.getItem('theatre-data'); // get objectJSON in localStorage
   const objData = objJson ? JSON.parse(objJson) : [];
 
   // --------------------------
@@ -75,16 +75,23 @@ export default function DemoScroll() {
 
   // ----------------------------
 
-  const [hasMediaError, setHasMediaError] = useState(false); // image & background && video onError
-  const [loadedMedias, setLoadedMedias] = useState(0); // image & background && video onload
+  // handle error: image & background & video & bgVideo
+  const [hasMediaError, setHasMediaError] = useState(false);
+  // handle loading: image & background & video & bgVideo
+  const [loadedMedias, setLoadedMedias] = useState(0);
+
   const [isLoading, setIsLoading] = useState(true);
 
   const totalMedias = objData.filter(
-    (data) => data.type === 'IMAGE' || data.type === 'BACKGROUND'
+    (data) =>
+      data.type === 'VIDEO' ||
+      data.type === 'BGVIDEO' ||
+      data.type === 'IMAGE' ||
+      data.type === 'BACKGROUND'
   ).length;
 
   useEffect(() => {
-    if (loadedMedias === totalMedias) {
+    if (loadedMedias >= totalMedias) {
       setIsLoading(false);
     }
   }, [loadedMedias, totalMedias]);
