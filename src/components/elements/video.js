@@ -25,6 +25,7 @@ export default function VideoElement({
   source,
   stageSize,
   draggable = true,
+  onLoad,
   onError,
 }) {
   const object = sheet.object(id, {
@@ -103,9 +104,19 @@ export default function VideoElement({
         height: `${newValue.size.height}px`,
         zIndex: `${newValue.zIndex}`,
         transform: `scale(${newValue.scale}) translate(-50%, -50%)`,
+        opacity: `${newValue.opacity}`,
       });
     });
   }, [object]);
+
+  // Loading setting ----------------------
+  const [isVideoLoading, setIsVideoLoading] = useState(true);
+
+  useEffect(() => {
+    if (!isVideoLoading) {
+      onLoad();
+    }
+  }, [isVideoLoading]);
 
   return (
     <Video
@@ -115,10 +126,26 @@ export default function VideoElement({
       style={style}
       preload='auto'
       loop={isLoop}
+      playsInline={true}
       onClick={() => {
         studio.setSelection([object]);
       }}
-      onError={onError}
+      onWaiting={() => {
+        setIsVideoLoading(true);
+      }}
+      onCanPlay={() => {
+        setIsVideoLoading(false);
+      }}
+      onPlay={(e) => {
+        e.target.pause();
+      }}
+      onEnded={(e) => {
+        e.target.pause();
+      }}
+      onError={() => {
+        onError();
+        setIsVideoLoading(false);
+      }}
     >
       <source src={source} />
     </Video>
