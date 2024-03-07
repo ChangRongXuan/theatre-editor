@@ -4,6 +4,7 @@ import BackgroundElement from './elements/background';
 import VideoElement from './elements/video';
 import BgVideoElement from './elements/bgVideo';
 import styled from 'styled-components';
+
 const Wrapper = styled.div`
   width: 100%;
   height: 100%;
@@ -85,6 +86,7 @@ export default function Stage({
           sheet={sheet}
           stageSize={stageSize}
           draggable={draggable}
+          onLoad={handleOnLoad}
           onError={handleOnError}
         />
       );
@@ -101,6 +103,7 @@ export default function Stage({
           sheet={sheet}
           stageSize={stageSize}
           draggable={draggable}
+          onLoad={handleOnLoad}
           onError={handleOnError}
         />
       );
