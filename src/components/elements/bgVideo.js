@@ -9,22 +9,9 @@ const BgVideo = styled.video`
   display: block;
   height: auto;
   box-sizing: border-box;
-
-  /* hide controls on iOS */
-  /* &::-webkit-media-controls-panel,
-  &::-webkit-media-controls-play-button,
-  &::-webkit-media-controls-start-playback-button {
-    display: none !important;
-    -webkit-appearance: none !important;
-  } */
-
   width: 100vw;
   height: 100vh;
 `;
-
-// 要等 loading 完才完成載入中
-// 參數：(1) 加上 opacity (2) 加上可以調整捲動 vs. 播放比例
-// video + bgVideo 加入載入中判定 + 錯誤處理
 
 export default function BgVideoElement({
   id,
@@ -32,6 +19,7 @@ export default function BgVideoElement({
   source,
   stageSize,
   draggable = true,
+  onLoad,
   onError,
 }) {
   const object = sheet.object(id, {
@@ -86,10 +74,12 @@ export default function BgVideoElement({
 
   // Style setting ----------------------
   const [style, setStyle] = useState({});
+  const [scrollSpeed, setScrollSpeed] = useState(2000);
 
   useEffect(() => {
     object.onValuesChange((newValue) => {
       setIsVisible(newValue.visible);
+      setScrollSpeed(newValue.speed);
       setStyle({
         left: `${newValue.position.x}%`,
         top: `${newValue.position.y}%`,
@@ -98,6 +88,7 @@ export default function BgVideoElement({
         height: `${newValue.size.height}%`,
         zIndex: `${newValue.zIndex}`,
         transform: `scale(${newValue.scale}) translate(-50%, -50%)`,
+        opacity: `${newValue.opacity}`,
       });
     });
   }, [object]);
@@ -110,23 +101,19 @@ export default function BgVideoElement({
   };
 
   useEffect(() => {
-    let initialScrollPos = 0; // 保存 isVisible 變為 true 時的初始滾動位置
-    let videoDuration = 0; // 視頻總時長
+    let initialScrollPos = 0;
+    let videoDuration = 0;
 
-    // 設置滾動事件處理函數，根據滾動距離調整視頻播放進度
     const handleScroll = () => {
       const currentScrollPos = window.scrollY;
       const scrollDistance = currentScrollPos - initialScrollPos;
 
-      // 根據滾動距離計算應當播放的視頻時間
-      // 假設每滾動 250px 播放1秒視頻
-      const scrollRatio = scrollDistance / 300;
+      const scrollRatio = scrollDistance / scrollSpeed; //每滾動 scrollSpeed px 會播放 1s 影片
 
       let newTime;
       if (scrollDistance < 0) {
         newTime = Math.max(0, videoDuration + scrollRatio);
       } else {
-        // newTime = scrollRatio % videoDuration; //這寫法會無限從頭播放
         newTime = scrollRatio;
       }
 
@@ -141,10 +128,10 @@ export default function BgVideoElement({
     };
 
     if (isVisible) {
-      initialScrollPos = window.scrollY; // 記錄當 isVisible 變為 true 時的滾動位置
+      initialScrollPos = window.scrollY;
       if (videoRef.current) {
-        videoDuration = videoRef.current.duration || 0; // 獲取視頻總時長
-        videoRef.current.currentTime = 0; // 從視頻開始播放
+        videoDuration = videoRef.current.duration || 0;
+        videoRef.current.currentTime = 0;
       }
       window.addEventListener('scroll', handleScroll);
     } else {
@@ -154,20 +141,77 @@ export default function BgVideoElement({
     return () => {
       window.removeEventListener('scroll', handleScroll);
     };
-  }, [isVisible]);
+  }, [isVisible, scrollSpeed]);
+
+  // get buffer time ----------------------
+  const [bufferTime, setBufferTime] = useState(0);
+
+  useEffect(() => {
+    const video = videoRef.current;
+
+    const handleProgress = () => {
+      const bufferedTimeRanges = video.buffered;
+      if (bufferedTimeRanges.length > 0) {
+        const bufferedTime = bufferedTimeRanges.end(
+          bufferedTimeRanges.length - 1
+        );
+        setBufferTime(bufferedTime);
+      }
+    };
+
+    if (video) {
+      video.addEventListener('progress', handleProgress);
+
+      return () => {
+        video.removeEventListener('progress', handleProgress);
+      };
+    }
+  }, [videoRef]);
+
+  // Loading setting ----------------------
+  const [isVideoLoading, setIsVideoLoading] = useState(true);
+
+  useEffect(() => {
+    let videoDuration = videoRef.current.duration || 0;
+    let threshold = videoDuration / 4 > 10 ? 10 : videoDuration / 4;
+
+    if (!isVideoLoading && bufferTime > threshold) {
+      onLoad();
+    }
+  }, [isVideoLoading, bufferTime]);
+
+  // onCanPlay: 瀏覽器已經可以播放，但沒有完全加載完成
+  // onWaiting: 影片 buffer 不足導致暫停播放
+  // onDurationChange: (1) 總時長被 browser 偵測到 (2) 影片總時長改變
+  // onPlay: 按下播放鍵
 
   return (
     <BgVideo
-      className='video'
       muted
       autoPlay={false}
       ref={setMultipleRefs}
       style={style}
       preload='auto'
+      playsInline={true}
       onClick={() => {
         studio.setSelection([object]);
       }}
-      onError={onError}
+      onWaiting={() => {
+        setIsVideoLoading(true);
+      }}
+      onCanPlay={() => {
+        setIsVideoLoading(false);
+      }}
+      onPlay={(e) => {
+        e.target.pause();
+      }}
+      onEnded={(e) => {
+        e.target.pause();
+      }}
+      onError={() => {
+        onError();
+        setIsVideoLoading(false);
+      }}
       controls
     >
       <source src={source} />
