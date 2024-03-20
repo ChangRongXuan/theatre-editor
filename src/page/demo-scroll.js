@@ -121,6 +121,7 @@ export default function DemoScroll() {
           sheet={sheet}
           stageWidth={window.innerWidth}
           draggable={false}
+          setIsLoading={setIsLoading}
           setHasMediaError={setHasMediaError}
           setLoadedMedias={setLoadedMedias}
         />

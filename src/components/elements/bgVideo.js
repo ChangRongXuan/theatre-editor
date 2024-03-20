@@ -21,6 +21,7 @@ export default function BgVideoElement({
   draggable = true,
   onLoad,
   onError,
+  setIsLoading,
 }) {
   const object = sheet.object(id, {
     ...initialConfig.BGVIDEO,
@@ -144,47 +145,63 @@ export default function BgVideoElement({
   }, [isVisible, scrollSpeed]);
 
   // get buffer time ----------------------
-  const [bufferTime, setBufferTime] = useState(0);
+  // const [bufferTime, setBufferTime] = useState(0);
 
-  useEffect(() => {
-    const video = videoRef.current;
+  // useEffect(() => {
+  //   const video = videoRef.current;
 
-    const handleProgress = () => {
-      const bufferedTimeRanges = video.buffered;
-      if (bufferedTimeRanges.length > 0) {
-        const bufferedTime = bufferedTimeRanges.end(
-          bufferedTimeRanges.length - 1
-        );
-        setBufferTime(bufferedTime);
-      }
-    };
+  //   const handleProgress = () => {
+  //     const bufferedTimeRanges = video.buffered;
+  //     if (bufferedTimeRanges.length > 0) {
+  //       const bufferedTime = bufferedTimeRanges.end(
+  //         bufferedTimeRanges.length - 1
+  //       );
+  //       setBufferTime(bufferedTime);
+  //     }
+  //   };
 
-    if (video) {
-      video.addEventListener('progress', handleProgress);
+  //   if (video) {
+  //     video.addEventListener('progress', handleProgress);
 
-      return () => {
-        video.removeEventListener('progress', handleProgress);
-      };
-    }
-  }, [videoRef]);
+  //     return () => {
+  //       video.removeEventListener('progress', handleProgress);
+  //     };
+  //   }
+  // }, [videoRef]);
 
   // Loading setting ----------------------
   const [isVideoLoading, setIsVideoLoading] = useState(true);
 
   useEffect(() => {
-    let videoDuration = videoRef.current.duration || 0;
-    let threshold = videoDuration / 4 > 10 ? 10 : videoDuration / 4;
+    // 由於 bufferTime > threshold 條件會導致 loading 過久，且在不同瀏覽器下會有持續載入中狀況，故暫時註解
 
-    if (!isVideoLoading && bufferTime > threshold) {
+    // let videoDuration = videoRef.current.duration || 0
+    // let threshold = videoDuration / 4 > 10 ? 10 : videoDuration / 4
+
+    // if (!isVideoLoading && bufferTime > threshold) {
+    //   onLoad()
+    // }
+
+    if (!isVideoLoading) {
       onLoad();
+      console.log('捲動式影片已載入');
     }
-  }, [isVideoLoading, bufferTime]);
+  }, [isVideoLoading, source]);
+
+  useEffect(() => {
+    if (videoRef.current) {
+      videoRef.current.src = source;
+      videoRef.current.load();
+      setIsVideoLoading(true);
+      setIsLoading(true);
+    }
+    console.log('執行捲動式影片更新');
+  }, [source]);
 
   // onCanPlay: 瀏覽器已經可以播放，但沒有完全加載完成
   // onWaiting: 影片 buffer 不足導致暫停播放
   // onDurationChange: (1) 總時長被 browser 偵測到 (2) 影片總時長改變
   // onPlay: 按下播放鍵
-
   return (
     <BgVideo
       muted

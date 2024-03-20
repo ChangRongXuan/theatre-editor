@@ -18,6 +18,7 @@ export default function Stage({
   sheet,
   stageSize,
   draggable,
+  setIsLoading = () => {},
   setLoadedMedias = () => {},
   setHasMediaError = () => {},
 }) {
@@ -105,6 +106,7 @@ export default function Stage({
           draggable={draggable}
           onLoad={handleOnLoad}
           onError={handleOnError}
+          setIsLoading={setIsLoading}
         />
       );
     });
